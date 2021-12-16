@@ -9,12 +9,15 @@
 import argparse
 import numpy as np
 import cv2
-import tensorflow as tf
+# import tensorflow as tf
 
 from tensorpack import TowerContext
 from tensorpack.tfutils import get_model_loader
 from tensorpack.dataflow.dataset import ILSVRCMeta
-
+# tf.disable_v2_behavior() 
+import tensorflow.compat.v1 as tf
+tf.compat.v1.disable_eager_execution()
+tf.disable_v2_behavior()
 import nets
 
 """
