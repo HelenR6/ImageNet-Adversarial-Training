@@ -50,13 +50,17 @@ def resnet_bottleneck(l, ch_out, stride, group=1, res2_bottleneck=64):
     ret = l + resnet_shortcut(shortcut, ch_out * 4, stride, activation=get_bn(zero_init=False))
     return tf.nn.relu(ret, name='block_output')
 
-
+act_dict={}
 def resnet_group(name, l, block_func, features, count, stride):
+  
     with tf.variable_scope(name):
         for i in range(0, count):
             with tf.variable_scope('block{}'.format(i)):
+                print(name)
+                layername='layer'+str(int(name[-1])+1)+'['+str(i)+']'
                 current_stride = stride if i == 0 else 1
                 l = block_func(l, features, current_stride)
+                act_dict[layername]=l
     return l
 
 
@@ -78,7 +82,7 @@ def resnet_backbone(image, num_blocks, group_func, block_func):
         The 1000-way fully-connected layer is initialized by
         drawing weights from a zero-mean Gaussian with standard deviation of 0.01
         """
-    return logits
+    return logits,act_dict
 
 
 def denoising(name, l, embed=True, softmax=True):
