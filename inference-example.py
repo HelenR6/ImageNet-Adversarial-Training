@@ -49,11 +49,17 @@ with TowerContext('', is_training=False):
 sess = tf.Session()
 get_model_loader(args.load).init(sess)
 
+
 f = h5py.File(args.input,'r')
 natural_data = f['images/naturalistic'][:]
 synth_data=f['images/synthetic/monkey_m/stretch/session_1'][:]
 print(natural_data.shape)
 
+def batch(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+      
+        yield iterable[ndx:min(ndx + n, l)]
 preprocess = transforms.Compose([
 transforms.Resize(256),
 transforms.CenterCrop(224),
@@ -63,20 +69,55 @@ mean=[0.485, 0.456, 0.406],
 std=[0.229, 0.224, 0.225])
 ])
 sample = np.array([np.array(preprocess((Image.fromarray(i)).convert('RGB'))) for i in natural_data]).transpose(0,2,3,1)
+counter=0
+for  minibatch in batch(sample,64):
+  prob = sess.run(logits,feed_dict={input: minibatch})
+  activation = sess.run(act_dict,feed_dict={input: minibatch})
+  if counter==0:
+    with h5py.File('ResNeXtDenoiseAll_natural_layer_activation.hdf5','w')as f:
+      for layer in activation.keys():
+        dset=f.create_dataset(layer,data=activation[layer])
+  else:
+    with h5py.File('ResNeXtDenoiseAll_natural_layer_activation.hdf5','r+')as f:
+        for k,v in activation.items():
+          print(k)
+          data = f[k]
+          print(data.shape)
+          a=data[...]
+          del f[k]
+          dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
+  counter=counter+1
 
-# sample = cv2.imread(args.input)  # this is a BGR image, not RGB
-# # imagenet evaluation uses standard imagenet pre-processing
-# # (resize shortest edge to 256 + center crop 224).
-# # However, for images of unknown sources, let's just do a naive resize.
-# sample = cv2.resize(sample, (224, 224))
+# for i in range(2):
 
-# prob = sess.run(logits,feed_dict={input: np.array([sample])})
-prob = sess.run(logits,feed_dict={input: sample})
-# activation = sess.run(act_dict,feed_dict={input: np.array([sample])})
-activation = sess.run(act_dict,feed_dict={input: sample})
-print("Prediction: ", prob.argmax())
+#   sample = cv2.imread(args.input)  # this is a BGR image, not RGB
+#   # imagenet evaluation uses standard imagenet pre-processing
+#   # (resize shortest edge to 256 + center crop 224).
+#   # However, for images of unknown sources, let's just do a naive resize.
+#   sample = cv2.resize(sample, (224, 224))
 
-synset = ILSVRCMeta().get_synset_words_1000()
-print("Top 5: ", [synset[k] for k in prob[0].argsort()[-5:][::-1]])
+#   prob = sess.run(logits,feed_dict={input: np.array([sample])})
 
-print(activation['layer1[0]'].shape)
+#   activation = sess.run(act_dict,feed_dict={input: np.array([sample])})
+
+#   print("Prediction: ", prob.argmax())
+
+#   synset = ILSVRCMeta().get_synset_words_1000()
+#   print("Top 5: ", [synset[k] for k in prob[0].argsort()[-5:][::-1]])
+
+#   print(activation['layer1[0]'].shape)
+#   print(type(activation['layer1[0]']))
+#   if counter==0:
+#     with h5py.File('ResNeXtDenoiseAll_natural_layer_activation.hdf5','w')as f:
+#       for layer in activation.keys():
+#         dset=f.create_dataset(layer,data=activation[layer])
+#   else:
+#     with h5py.File('ResNeXtDenoiseAll_natural_layer_activation.hdf5','r+')as f:
+#         for k,v in activation.items():
+#           print(k)
+#           data = f[k]
+          
+#           a=data[...]
+#           del f[k]
+#           dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
+#   counter=counter+1
