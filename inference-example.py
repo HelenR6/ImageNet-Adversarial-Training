@@ -22,7 +22,7 @@ import nets
 from PIL import Image
 import h5py
 from torchvision import transforms 
-# import torch
+
 
 """
 A small inference example for attackers to play with.
@@ -43,6 +43,8 @@ model = getattr(nets, args.arch + 'Model')(args)
 input = tf.placeholder(tf.float32, shape=(None, 224, 224, 3))
 image = input / 127.5 - 1.0
 image = tf.transpose(image, [0, 3, 1, 2])
+# if torch.cuda.is_available():
+#   image = tf.transpose(image, [0, 3, 1, 2])
 with TowerContext('', is_training=False):
     logits,act_dict = model.get_logits(image)
 
@@ -70,6 +72,7 @@ std=[0.229, 0.224, 0.225])
 ])
 natural_sample = np.array([np.array(preprocess((Image.fromarray(i)).convert('RGB'))) for i in natural_data]).transpose(0,2,3,1)
 synth_sample = np.array([np.array(preprocess((Image.fromarray(i)).convert('RGB'))) for i in synth_data]).transpose(0,2,3,1)
+
 counter=0
 for  minibatch in batch(natural_sample,32):
   prob = sess.run(logits,feed_dict={input: minibatch})
@@ -92,19 +95,19 @@ for  minibatch in batch(natural_sample,32):
 
 prob = sess.run(logits,feed_dict={input: synth_sample})
 activation = sess.run(act_dict,feed_dict={input: synth_sample})
-if counter==0:
-  with h5py.File('ResNeXtDenoiseAll_synth_layer_activation.hdf5','w')as f:
-    for layer in activation.keys():
-      dset=f.create_dataset(layer,data=activation[layer])
-else:
-  with h5py.File('ResNeXtDenoiseAll_synth_layer_activation.hdf5','r+')as f:
-      for k,v in activation.items():
-        print(k)
-        data = f[k]
-        print(data.shape)
-        a=data[...]
-        del f[k]
-        dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
+# if counter==0:
+with h5py.File('ResNeXtDenoiseAll_synth_layer_activation.hdf5','w')as f:
+  for layer in activation.keys():
+    dset=f.create_dataset(layer,data=activation[layer])
+# else:
+with h5py.File('ResNeXtDenoiseAll_synth_layer_activation.hdf5','r+')as f:
+    for k,v in activation.items():
+      print(k)
+      data = f[k]
+      print(data.shape)
+      a=data[...]
+      del f[k]
+      dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
 
 
 
