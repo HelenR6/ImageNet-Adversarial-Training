@@ -37,7 +37,7 @@ parser.add_argument('--arch', help='Name of architectures defined in nets.py',
                     default='ResNetDenoise')
 parser.add_argument('--load', help='path to checkpoint')
 parser.add_argument('--input', help='path to input image')
-parser.add_argument('--neuronwise', help='whether neuro wise or not')
+# parser.add_argument('--neuronwise', help='whether neuro wise or not')
 parser.add_argument('--session', help='session name')
 args = parser.parse_args()
 
@@ -203,42 +203,42 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
         print(natural_score_dict[k])
         print(synth_score_dict[k]) 
     print(cc)
-    if args.neuronwise==True:
-      # total_synth_corr=total_synth_corr/len(random_list)
-      # total_natural_corr=total_natural_corr/len(random_list)
-      np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth_neuron_corr.npy',total_synth_corr)
-      np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural_neuron_corr.npy',total_natural_corr)
+  # if args.neuronwise==True:
+    # total_synth_corr=total_synth_corr/len(random_list)
+    # total_natural_corr=total_natural_corr/len(random_list)
+    np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth_neuron_corr.npy',total_synth_corr)
+    np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural_neuron_corr.npy',total_natural_corr)
 
 
-    else:
+  # else:
 
 
-      from statistics import mean
-      new_natural_score_dict = {k:  v.tolist() for k, v in natural_score_dict.items()}
-      new_synth_score_dict = {k:  v.tolist() for k, v in synth_score_dict.items()}
-      import json
-      # Serializing json  
-      synth_json = json.dumps(new_synth_score_dict, indent = 4) 
-      natural_json = json.dumps(new_natural_score_dict, indent = 4) 
-      print(natural_json)
-      print(synth_json)
+    from statistics import mean
+    new_natural_score_dict = {k:  v.tolist() for k, v in natural_score_dict.items()}
+    new_synth_score_dict = {k:  v.tolist() for k, v in synth_score_dict.items()}
+    import json
+    # Serializing json  
+    synth_json = json.dumps(new_synth_score_dict, indent = 4) 
+    natural_json = json.dumps(new_natural_score_dict, indent = 4) 
+    print(natural_json)
+    print(synth_json)
 
-      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural.json", 'w') as f:
-        json.dump(natural_json, f)
-      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth.json", 'w') as f:
-        json.dump(synth_json, f)
+    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural.json", 'w') as f:
+      json.dump(natural_json, f)
+    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth.json", 'w') as f:
+      json.dump(synth_json, f)
 
-      natural_mean_dict = {k:  mean(v) for k, v in natural_score_dict.items()}
-      synth_mean_dict = {k:  mean(v) for k, v in synth_score_dict.items()}
-      json_object = json.dumps(natural_mean_dict, indent = 4) 
-      print(json_object)
-      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural_mean.json", 'w') as f:
-        json.dump(json_object, f)
+    natural_mean_dict = {k:  mean(v) for k, v in natural_score_dict.items()}
+    synth_mean_dict = {k:  mean(v) for k, v in synth_score_dict.items()}
+    json_object = json.dumps(natural_mean_dict, indent = 4) 
+    print(json_object)
+    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural_mean.json", 'w') as f:
+      json.dump(json_object, f)
 
-      json_object = json.dumps(synth_mean_dict, indent = 4) 
-      print(json_object)
-      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth_mean.json", 'w') as f:
-        json.dump(json_object, f)
+    json_object = json.dumps(synth_mean_dict, indent = 4) 
+    print(json_object)
+    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth_mean.json", 'w') as f:
+      json.dump(json_object, f)
 # for i in range(2):
 
 #   sample = cv2.imread(args.input)  # this is a BGR image, not RGB
