@@ -223,21 +223,21 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
       print(natural_json)
       print(synth_json)
 
-      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural.json", 'w') as f:
         json.dump(natural_json, f)
-      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth.json", 'w') as f:
         json.dump(synth_json, f)
 
       natural_mean_dict = {k:  mean(v) for k, v in natural_score_dict.items()}
       synth_mean_dict = {k:  mean(v) for k, v in synth_score_dict.items()}
       json_object = json.dumps(natural_mean_dict, indent = 4) 
       print(json_object)
-      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural_mean.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural_mean.json", 'w') as f:
         json.dump(json_object, f)
 
       json_object = json.dumps(synth_mean_dict, indent = 4) 
       print(json_object)
-      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth_mean.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth_mean.json", 'w') as f:
         json.dump(json_object, f)
 # for i in range(2):
 
