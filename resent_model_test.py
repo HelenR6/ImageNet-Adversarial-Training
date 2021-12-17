@@ -106,7 +106,7 @@ def non_local_op(l, embed, softmax):
         embed (bool): whether to use embedding on theta & phi
         softmax (bool): whether to use gaussian (softmax) version or the dot-product version.
     """
-    n_in, H, W = l.shape.as_list()[1:]
+    H, W,n_in = l.shape.as_list()[1:]
     if embed:
         theta = Conv2D('embedding_theta', l, n_in / 2, 1,
                        strides=1, kernel_initializer=tf.random_normal_initializer(stddev=0.01), data_format="channels_last")
