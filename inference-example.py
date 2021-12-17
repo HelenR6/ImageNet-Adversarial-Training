@@ -78,30 +78,11 @@ std=[0.229, 0.224, 0.225])
 natural_sample = np.array([np.array(preprocess((Image.fromarray(i)).convert('RGB'))) for i in natural_data]).transpose(0,2,3,1)
 synth_sample = np.array([np.array(preprocess((Image.fromarray(i)).convert('RGB'))) for i in synth_data]).transpose(0,2,3,1)
 
-counter=0
-for  minibatch in batch(natural_sample,64):
-  prob = sess.run(logits,feed_dict={input: minibatch})
-  activation = sess.run(act_dict,feed_dict={input: minibatch})
-  if counter==0:
-    with h5py.File('ResNeXtDenoiseAll_natural_layer_activation.hdf5','w')as f:
-      for layer in activation.keys():
-        dset=f.create_dataset(layer,data=activation[layer])
-  else:
-    with h5py.File('ResNeXtDenoiseAll_natural_layer_activation.hdf5','r+')as f:
-        for k,v in activation.items():
-          print(k)
-          data = f[k]
-          print(data.shape)
-          a=data[...]
-          del f[k]
-          dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
-  counter=counter+1
-
 
 prob = sess.run(logits,feed_dict={input: synth_sample})
 activation = sess.run(act_dict,feed_dict={input: synth_sample})
 # if counter==0:
-with h5py.File('ResNeXtDenoiseAll_synth_layer_activation.hdf5','w')as f:
+with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','w')as f:
   for layer in activation.keys():
     dset=f.create_dataset(layer,data=activation[layer])
 # else:
@@ -114,6 +95,24 @@ with h5py.File('ResNeXtDenoiseAll_synth_layer_activation.hdf5','r+')as f:
       del f[k]
       dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
 
+counter=0
+for  minibatch in batch(natural_sample,64):
+  prob = sess.run(logits,feed_dict={input: minibatch})
+  activation = sess.run(act_dict,feed_dict={input: minibatch})
+  if counter==0:
+    with h5py.File(f'{args.arch}_natural_layer_activation.hdf5','w')as f:
+      for layer in activation.keys():
+        dset=f.create_dataset(layer,data=activation[layer])
+  else:
+    with h5py.File(f'{args.arch}_natural_layer_activation.hdf5','r+')as f:
+        for k,v in activation.items():
+          print(k)
+          data = f[k]
+          print(data.shape)
+          a=data[...]
+          del f[k]
+          dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
+  counter=counter+1
 
 import numpy as np
 from sklearn.model_selection import KFold
@@ -133,8 +132,8 @@ for key in layerlist:
 total_synth_corr=[]
 total_natural_corr=[]
 cc=0
-with h5py.File(f'{model_type}_synth_layer_activation.hdf5','r')as s:
-  with h5py.File(f'{model_type}_natural_layer_activation.hdf5','r')as f:
+with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
+  with h5py.File(f'{args.arch}_natural_layer_activation.hdf5','r')as f:
     for seed in random_list:
       for k in layerlist:
         print(k)
