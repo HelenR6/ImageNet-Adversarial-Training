@@ -66,7 +66,7 @@ print(natural_data.shape)
 n1 = f.get('neural/naturalistic/monkey_'+final_path)[:]
 target=np.mean(n1, axis=0)
 print(target.shape)
-n2=f.get('neural/synthetic/monkey__'+final_path)[:]
+n2=f.get('neural/synthetic/monkey_'+final_path)[:]
 neuron_target=np.mean(n2, axis=0)
 
 def batch(iterable, n=1):
@@ -93,7 +93,7 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','w')as f:
   for layer in activation.keys():
     dset=f.create_dataset(layer,data=activation[layer])
 # else:
-with h5py.File('ResNeXtDenoiseAll_synth_layer_activation.hdf5','r+')as f:
+with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r+')as f:
     for k,v in activation.items():
       print(k)
       data = f[k]
@@ -203,7 +203,7 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
         print(natural_score_dict[k])
         print(synth_score_dict[k]) 
     print(cc)
-    if args.neurowise==True:
+    if args.neuronwise==True:
       # total_synth_corr=total_synth_corr/len(random_list)
       # total_natural_corr=total_natural_corr/len(random_list)
       np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth_neuron_corr.npy',total_synth_corr)
