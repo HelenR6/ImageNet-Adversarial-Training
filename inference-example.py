@@ -93,14 +93,14 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','w')as f:
   for layer in activation.keys():
     dset=f.create_dataset(layer,data=activation[layer])
 # else:
-with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r+')as f:
-    for k,v in activation.items():
-      print(k)
-      data = f[k]
-      print(data.shape)
-      a=data[...]
-      del f[k]
-      dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
+# with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r+')as f:
+#     for k,v in activation.items():
+#       print(k)
+#       data = f[k]
+#       print(data.shape)
+#       a=data[...]
+#       del f[k]
+#       dset=f.create_dataset(k,data=np.concatenate((a,activation[k]),axis=0))
 
 counter=0
 for  minibatch in batch(natural_sample,64):
