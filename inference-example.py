@@ -15,6 +15,7 @@ from tensorpack import TowerContext
 from tensorpack.tfutils import get_model_loader
 from tensorpack.dataflow.dataset import ILSVRCMeta
 # tf.disable_v2_behavior() 
+import torch
 import tensorflow.compat.v1 as tf
 tf.compat.v1.disable_eager_execution()
 tf.disable_v2_behavior()
@@ -61,6 +62,12 @@ final_path=session_path[:-1]+'_'+session_path[-1:]
 synth_data = f['images/synthetic/monkey_'+final_path][:]
 #synth_data=f['images/synthetic/monkey_m/stretch/session_1'][:]
 print(natural_data.shape)
+
+n1 = f.get('neural/naturalistic/monkey_'+final_path)[:]
+target=np.mean(n1, axis=0)
+print(target.shape)
+n2=f.get('neural/synthetic/monkey__'+final_path)[:]
+neuron_target=np.mean(n2, axis=0)
 
 def batch(iterable, n=1):
     l = len(iterable)
@@ -126,16 +133,17 @@ synth_score_dict={}
 # random_list=[2,5,667,89,43]
 random_list=[2,10,32,89,43]
 #layerlist=['maxpool','layer1[0]','layer1[1]','layer1[2]','layer2[0]','layer2[1]','layer2[2]','layer2[3]','layer3[0]','layer3[1]','layer3[2]','layer3[3]','layer3[4]','layer3[5]','layer4[0]','layer4[1]','layer4[2]','avgpool','fc']
-for key in layerlist:
+for key in activation.keys():
   natural_score_dict[key]=None
   synth_score_dict[key]=None
 total_synth_corr=[]
 total_natural_corr=[]
 cc=0
+
 with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
   with h5py.File(f'{args.arch}_natural_layer_activation.hdf5','r')as f:
     for seed in random_list:
-      for k in layerlist:
+      for k in activation.keys():
         print(k)
         natural_data = f[k]
         synth_data=s[k]
@@ -198,8 +206,8 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
     if args.neurowise==True:
       # total_synth_corr=total_synth_corr/len(random_list)
       # total_natural_corr=total_natural_corr/len(random_list)
-      np.save(f'gdrive/MyDrive/V4/monkey_+{final_path}/{args.arch}_synth_neuron_corr.npy',total_synth_corr)
-      np.save(f'gdrive/MyDrive/V4/monkey_+{final_path}/{args.arch}_natural_neuron_corr.npy',total_natural_corr)
+      np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth_neuron_corr.npy',total_synth_corr)
+      np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural_neuron_corr.npy',total_natural_corr)
 
 
     else:
@@ -215,21 +223,21 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
       print(natural_json)
       print(synth_json)
 
-      with open(f"gdrive/MyDrive/V4/monkey_+{final_path}/{args.arch}_natural.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural.json", 'w') as f:
         json.dump(natural_json, f)
-      with open(f"gdrive/MyDrive/V4/monkey_+{final_path}/{args.arch}_synth.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth.json", 'w') as f:
         json.dump(synth_json, f)
 
       natural_mean_dict = {k:  mean(v) for k, v in natural_score_dict.items()}
       synth_mean_dict = {k:  mean(v) for k, v in synth_score_dict.items()}
       json_object = json.dumps(natural_mean_dict, indent = 4) 
       print(json_object)
-      with open(f"gdrive/MyDrive/V4/monkey_+{final_path}/{args.arch}_natural_mean.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural_mean.json", 'w') as f:
         json.dump(json_object, f)
 
       json_object = json.dumps(synth_mean_dict, indent = 4) 
       print(json_object)
-      with open(f"gdrive/MyDrive/V4/monkey_+{final_path}/{args.arch}_synth_mean.json", 'w') as f:
+      with open(f"gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth_mean.json", 'w') as f:
         json.dump(json_object, f)
 # for i in range(2):
 
