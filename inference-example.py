@@ -89,7 +89,7 @@ synth_sample = np.array([np.array(preprocess((Image.fromarray(i)).convert('RGB')
 prob = sess.run(logits,feed_dict={input: synth_sample})
 activation = sess.run(act_dict,feed_dict={input: synth_sample})
 # if counter==0:
-with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','w')as f:
+with h5py.File(f'{args.session}_{args.arch}_synth_layer_activation.hdf5','w')as f:
   for layer in activation.keys():
     dset=f.create_dataset(layer,data=activation[layer])
 # else:
@@ -107,11 +107,11 @@ for  minibatch in batch(natural_sample,64):
   prob = sess.run(logits,feed_dict={input: minibatch})
   activation = sess.run(act_dict,feed_dict={input: minibatch})
   if counter==0:
-    with h5py.File(f'{args.arch}_natural_layer_activation.hdf5','w')as f:
+    with h5py.File(f'{args.session}_{args.arch}_natural_layer_activation.hdf5','w')as f:
       for layer in activation.keys():
         dset=f.create_dataset(layer,data=activation[layer])
   else:
-    with h5py.File(f'{args.arch}_natural_layer_activation.hdf5','r+')as f:
+    with h5py.File(f'{args.session}_{args.arch}_natural_layer_activation.hdf5','r+')as f:
         for k,v in activation.items():
           print(k)
           data = f[k]
@@ -140,8 +140,8 @@ total_synth_corr=[]
 total_natural_corr=[]
 cc=0
 
-with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
-  with h5py.File(f'{args.arch}_natural_layer_activation.hdf5','r')as f:
+with h5py.File(f'{args.session}_{args.arch}_synth_layer_activation.hdf5','r')as s:
+  with h5py.File(f'{args.session}_{args.arch}_natural_layer_activation.hdf5','r')as f:
     for seed in random_list:
       for k in activation.keys():
         print(k)
@@ -213,32 +213,37 @@ with h5py.File(f'{args.arch}_synth_layer_activation.hdf5','r')as s:
   # else:
 
 
-    from statistics import mean
-    new_natural_score_dict = {k:  v.tolist() for k, v in natural_score_dict.items()}
-    new_synth_score_dict = {k:  v.tolist() for k, v in synth_score_dict.items()}
-    import json
-    # Serializing json  
-    synth_json = json.dumps(new_synth_score_dict, indent = 4) 
-    natural_json = json.dumps(new_natural_score_dict, indent = 4) 
-    print(natural_json)
-    print(synth_json)
+from statistics import mean
+new_natural_score_dict = {k:  v.tolist() for k, v in natural_score_dict.items()}
+new_synth_score_dict = {k:  v.tolist() for k, v in synth_score_dict.items()}
+import json
+# Serializing json  
+synth_json = json.dumps(new_synth_score_dict, indent = 4) 
+natural_json = json.dumps(new_natural_score_dict, indent = 4) 
+print(natural_json)
+print(synth_json)
 
-    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural.json", 'w') as f:
-      json.dump(natural_json, f)
-    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth.json", 'w') as f:
-      json.dump(synth_json, f)
+with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural.json", 'w') as f:
+  json.dump(natural_json, f)
+with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth.json", 'w') as f:
+  json.dump(synth_json, f)
 
-    natural_mean_dict = {k:  mean(v) for k, v in natural_score_dict.items()}
-    synth_mean_dict = {k:  mean(v) for k, v in synth_score_dict.items()}
-    json_object = json.dumps(natural_mean_dict, indent = 4) 
-    print(json_object)
-    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural_mean.json", 'w') as f:
-      json.dump(json_object, f)
+natural_mean_dict = {k:  mean(v) for k, v in natural_score_dict.items()}
+synth_mean_dict = {k:  mean(v) for k, v in synth_score_dict.items()}
+json_object = json.dumps(natural_mean_dict, indent = 4) 
+print(json_object)
+with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_natural_mean.json", 'w') as f:
+  json.dump(json_object, f)
 
-    json_object = json.dumps(synth_mean_dict, indent = 4) 
-    print(json_object)
-    with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth_mean.json", 'w') as f:
-      json.dump(json_object, f)
+json_object = json.dumps(synth_mean_dict, indent = 4) 
+print(json_object)
+with open(f"gdrive/MyDrive/V4/{args.session}/{args.arch}_synth_mean.json", 'w') as f:
+  json.dump(json_object, f)
+with h5py.File(f'{args.session}_{args.arch}_synth_layer_activation.hdf5','r+')as s:
+  with h5py.File(f'{args.session}_{args.arch}_natural_layer_activation.hdf5','r+')as f:
+    for layer in activation.keys():
+      del s[layer]
+      del f[layer]
 # for i in range(2):
 
 #   sample = cv2.imread(args.input)  # this is a BGR image, not RGB
