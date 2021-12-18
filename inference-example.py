@@ -206,8 +206,8 @@ with h5py.File(f'{args.session}_{args.arch}_synth_layer_activation.hdf5','r')as 
   # if args.neuronwise==True:
     # total_synth_corr=total_synth_corr/len(random_list)
     # total_natural_corr=total_natural_corr/len(random_list)
-    np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_synth_neuron_corr.npy',total_synth_corr)
-    np.save(f'gdrive/MyDrive/V4/monkey_{final_path}/{args.arch}_natural_neuron_corr.npy',total_natural_corr)
+    np.save(f'gdrive/MyDrive/V4/{args.session}/{args.arch}_synth_neuron_corr.npy',total_synth_corr)
+    np.save(f'gdrive/MyDrive/V4/{args.session}/{args.arch}_natural_neuron_corr.npy',total_natural_corr)
 
 
   # else:
